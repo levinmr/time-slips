@@ -1,0 +1,7 @@
+-title("Time-Slips info for: #{@sheet.name}")
+
+-@sheet.lines.each do |l|
+  =render "line" :l => l
+  
+#-- At the bottom should be the option to create text file.
+#-- link_to "Output file" output_sheet_path(@sheet)

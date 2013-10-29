@@ -1,0 +1,12 @@
+-title("Time-Slips Creator")
+
+.well
+  %h4 Upload New Word Document
+  =render "form"
+  
+%p
+%p
+%h4 Previous Time Entries
+  
+-@sheets.each do |s|
+  =link_to s.name, sheet_path(s)

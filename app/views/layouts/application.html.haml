@@ -1,0 +1,41 @@
+!!!
+%meta{ :"http-equiv" => "Content-Type", :content => "text/html; charset=utf-8" }
+%html
+  %head
+    %title
+      -if yield(:title).blank?
+        ="Time-Slips Creator"
+      -else
+        =yield(:title)
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    = stylesheet_link_tag "application"
+    = javascript_include_tag "application"
+    = csrf_meta_tag 
+  %body
+    %nav.navbar.navbar-fixed-top
+      .navbar-inner
+        .my-container
+          =link_to "Home", root_url, :class => "brand nav"
+    .my-container.content
+      #notification
+        -if flash[:notice]
+          .alert.alert-success
+            = link_to "x", "", :class => "close"
+            = flash[:notice]
+        -if flash[:alert]
+          .alert
+            = link_to "x", "", :class => "close"
+            = flash[:alert]
+        -if flash[:error]
+          .alert.alert-error
+            = link_to "x", "", :class => "close"
+            = flash[:error]
+      %section
+        .page-header
+          %h1
+            -if yield(:title).blank?
+              ="Time-Slips Creator"
+            -else
+              =yield(:title)
+      
+      = yield

@@ -43,13 +43,13 @@ test:
   encoding: unicode
   database: time-slips_test
   pool: 5
-  username: time-slips
-  password: timepwd
+  username: mlevin
+  password: jeromey1
 
 production:
   adapter: postgresql
   encoding: unicode
   database: time-slips_production
   pool: 5
-  username: time-slips
-  password: timepwd
+  username: mlevin
+  password: jeromey1

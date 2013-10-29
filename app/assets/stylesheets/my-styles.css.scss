@@ -1,0 +1,61 @@
+//Mike Levin's Standard Styles
+//
+//These depend on bootstrap, font-awesome, jquery-ui and sass (but are written in scss format)
+//
+//required gems: 'sass-rails', 'bootstrap-sass', 'font-awesome-sass-rails', 'jquery-ui-sass-rails'
+//
+//There is support for best_in_place as well, and a custom span included.
+
+.navbar-inner {
+  background-image: linear-gradient(bottom, rgb(24,39,74) 7%, rgb(27,57,128) 75%);
+background-image: -o-linear-gradient(bottom, rgb(24,39,74) 7%, rgb(27,57,128) 75%);
+background-image: -moz-linear-gradient(bottom, rgb(24,39,74) 7%, rgb(27,57,128) 75%);
+background-image: -webkit-linear-gradient(bottom, rgb(24,39,74) 7%, rgb(27,57,128) 75%);
+background-image: -ms-linear-gradient(bottom, rgb(24,39,74) 7%, rgb(27,57,128) 75%);
+
+background-image: -webkit-gradient(
+	linear,
+	left bottom,
+	left top,
+	color-stop(0.07, rgb(24,39,74)),
+	color-stop(0.75, rgb(27,57,128))
+);
+}
+
+.content { margin-top: 4%; }
+
+.my-container { 
+  margin-left: 2%;
+  margin-right: 2%;
+}
+
+.full-width { width:100%; }
+
+.page-header { border-bottom:1px solid rgb(220,220,220); }
+
+hr {  border-color:rgb(220,220,220); }
+
+td.t { 
+  padding:8px;
+  border-top:1px solid rgb(220,220,220);
+  border-right:1px solid rgb(220,220,220);
+}
+
+td.t:last-child {
+  border-right:0px solid black;
+}
+
+.bold { 
+  display:inline; 
+  font-weight:bold;
+}
+
+span.best_in_place{
+  display: inline-block;
+  min-height: 13px;
+  width: 100%;
+  border-bottom: 1px dashed #aaa;
+  font-weight: bold;
+}
+
+html, body { height:100%;}

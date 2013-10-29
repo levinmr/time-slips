@@ -1,0 +1,4 @@
+=simple_form_for @sheet, :html => {:multipart => true} do |f|
+  =f.input :name
+  =f.file_field :file
+  =f.button :submit, "Save", :class => 'btn btn-primary'

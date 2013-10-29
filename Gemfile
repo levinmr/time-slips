@@ -7,33 +7,22 @@ gem 'rails', '3.2.14'
 
 gem 'pg'
 gem 'rails_12factor', group: :production
+gem 'docx'
+gem 'haml-rails'
+gem 'best_in_place'
+gem 'jquery-rails', '~> 1.0.19'
+gem 'fog'
+gem 'simple_form'
+gem 'carrierwave'
 
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
   gem 'sass-rails',   '~> 3.2.3'
+  gem 'bootstrap-sass', '~> 2.0.2'
   gem 'coffee-rails', '~> 3.2.1'
-
-  # See https://github.com/sstephenson/execjs#readme for more supported runtimes
-  # gem 'therubyracer', :platforms => :ruby
-
+  gem 'therubyracer'
   gem 'uglifier', '>= 1.0.3'
 end
 
-gem 'jquery-rails'
-
-# To use ActiveModel has_secure_password
-# gem 'bcrypt-ruby', '~> 3.0.0'
-
-# To use Jbuilder templates for JSON
-# gem 'jbuilder'
-
-# Use unicorn as the app server
-# gem 'unicorn'
-
-# Deploy with Capistrano
-# gem 'capistrano'
-
-# To use debugger
-# gem 'debugger'
 ruby '1.9.3'

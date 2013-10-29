@@ -1,0 +1,13 @@
+%table
+  %tr
+    %td= "Date: "
+    %td= best_in_place l, :date, :type => input
+  %tr
+    %td= "Client: "
+    %td= l.client.name
+  %tr
+    %td= "Hours Worked: "
+    %td= best_in_place l, :time, :type => input
+  %tr
+    %td= "Description: "
+    %td= best_in_place l, :description, :type => text
