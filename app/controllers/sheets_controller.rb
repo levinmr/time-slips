@@ -44,4 +44,12 @@ class SheetsController < ApplicationController
     flash[:notice] = "Sheet deleted."
     redirect_to(sheets_path)
   end
+  
+  def parse
+    @sheet = Sheet.find(params[:sheet_id])
+    @sheet.parse_file
+    
+    flash[:notice] = "Data imported from file"
+    render :show
+  end
 end

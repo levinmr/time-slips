@@ -53,7 +53,7 @@ td.t:last-child {
 span.best_in_place{
   display: inline-block;
   min-height: 13px;
-  width: 100%;
+  min-width: 50px;
   border-bottom: 1px dashed #aaa;
   font-weight: bold;
 }

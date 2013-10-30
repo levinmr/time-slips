@@ -8,5 +8,11 @@
 %p
 %h4 Previous Time Entries
   
+%table
 -@sheets.each do |s|
-  =link_to s.name, sheet_path(s)
+  %tr
+    %td=link_to s.name, sheet_path(s)
+    %td=link_to "Parse File", sheet_parse_path(s)
+    %td=link_to "Delete", sheet_path(s), :method => :delete, :confirm => "Are You Sure?"
+    
+    

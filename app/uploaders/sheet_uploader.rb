@@ -6,5 +6,4 @@ class SheetUploader < CarrierWave::Uploader::Base
   def extension_white_list
     %w(docx)
   end
-
 end

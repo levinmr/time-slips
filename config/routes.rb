@@ -1,5 +1,7 @@
 TimeSlips::Application.routes.draw do  
-  resources :sheets
+  resources :sheets do
+    get :parse
+  end
 
   resources :lines
 
