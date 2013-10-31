@@ -1,7 +1,7 @@
 %table
   %tr
     %td= "Date: "
-    %td= best_in_place l, :date, :type => :input
+    %td= l.date.strftime("%m/%d/%y")
   %tr
     %td= "Client: "
     %td= (l.client.nil? ? "" : l.client.name)
@@ -11,3 +11,4 @@
   %tr
     %td= "Description: "
     %td= best_in_place l, :description, :type => :textarea
+%hr

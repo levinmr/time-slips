@@ -19,7 +19,7 @@ class Sheet < ActiveRecord::Base
     f.paragraphs.each do |p|
       para = p.to_s
       if is_date?(para)
-        current_date = para
+        current_date = Date.parse para
       else
         if !para.blank?
           @line = Line.new({:date => current_date, :description => para, :sheet_id => self.id})
@@ -42,27 +42,25 @@ class Sheet < ActiveRecord::Base
   
   def get_time_and_client_return_description(l)
     desc = l.description  
+    desc = desc.gsub(/\u2013|\u2014/, "-")
     time_cust = ''
     
-    first_space = desc.index(" ")
-    if desc[first_space+1] != '-'
-      time_cust = desc[0..first_space]
-      desc = desc[(first_space + 1)..desc.length]
-      first_space = desc.index(" ")
+    first_dash = (desc.index('-').nil? ? 0 : desc.index('-'))
+    time_cust = desc[0..(first_dash-1)]
+    desc = desc[(first_dash+1)..desc.length]
+    second_dash = desc.index('-')
+    if !second_dash.nil? && second_dash < 2
+      desc = desc[(second_dash+1)]
     end
-    time_cust = time_cust + desc[0..first_space-1]
   
     cust_name = '%' + get_cust_name(time_cust).downcase + '%'
+    logger.info("client.abbrev LIKE #{cust_name}")
     l.client = Client.where('lower(abbrev) like ?', cust_name).first
     #parse the hours worked
     l.time = get_time(time_cust)
     l.save
     
-    #remove the part we just parsed, and the spacers
-    desc = desc[(time_cust.length + 1)..desc.length]
-    second_space = desc.index(" ")
-    desc = desc[(second_space + 1)..desc.length]
-    
+    desc = desc.strip
     desc
   end
   
@@ -76,14 +74,17 @@ class Sheet < ActiveRecord::Base
   end
   
   def get_cust_name(str)
+    arr = str.split('')
     cust_name = ''
-    str_array = str.split(//)
-    str_array.length.times do |x|
-      if str_array[x] =~ /[[:alpha:]]/
-        cust_name = cust_name + str_array[x]
+    arr.length.times do |x|
+      if arr[x] =~ /[[:alpha:]]/
+        break
+      else 
+        cust_name = str[(x+1)..str.length]
       end
     end
-    cust_name.to_s
+    cust_name = cust_name.strip
+    cust_name
   end
   
   def get_time(str)
@@ -103,14 +104,15 @@ class Sheet < ActiveRecord::Base
     str_array.length.times do |x|
       #if it's the beginning of the string, or right after punctuation, then capitalize the word.
       word = str_array[x]
-      if x == 0 && !str_array[x-1].nil? && (str_array[x-1].split(//).last =~ /[[:alpha:]]/)
-        word.titleize if !word.nil?
-      else
-        word.downcase if !word.nil?
+      if x == 0 || (!str_array[x-1].nil? && !(str_array[x-1].split(//).last =~ /[[:alpha:]]/))
+        word = word.capitalize if !word.nil?
+      elsif word.length == 2 && !(str_array[x].split(//).last =~ /[[:alpha:]]/)
+        word = word.capitalize if !word.nil?
       end
       #Add a space after each word.
       converted_str = converted_str + word.to_s + ' '
     end
+    converted_str = converted_str.strip
     converted_str
   end
   
@@ -127,5 +129,32 @@ class Sheet < ActiveRecord::Base
       end
     end
     new_str
+  end
+  
+  def combine_lines
+    dates = lines.uniq{ |l| l.date }.collect{ |l| l.date}
+    need_deleted = []
+    dates.each do |date|
+      current_lines = lines.select{ |l| l.date == date}
+      customers = current_lines.uniq{ |c| c.client_id}.collect{ |c| c.client_id}
+      customers.each do |cust|
+        need_combined = current_lines.select{ |l| l.client_id == cust}
+        if need_combined.size > 1
+          parent = need_combined.first
+          (need_combined.size-1).times do |x|
+            parent.time = parent.time + need_combined[x+1].time
+            parent.description = parent.description + "; " + need_combined[x+1].description
+          end
+          parent.save
+          need_combined = need_combined.select{|n| n.id != parent.id}
+          need_combined.each do |n|
+            need_deleted << n
+          end
+        end
+      end
+    end
+    need_deleted.each do |n|
+      n.destroy
+    end
   end
 end

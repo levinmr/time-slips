@@ -16,6 +16,9 @@
       .navbar-inner
         .my-container
           =link_to "Home", root_url, :class => "brand nav"
+          %ul.nav
+            %li=link_to "Changes", changes_path, :class => "nav"
+            %li=link_to "Clents", clients_path, :class => "nav"
     .my-container.content
       #notification
         -if flash[:notice]

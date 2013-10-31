@@ -48,6 +48,9 @@ class SheetsController < ApplicationController
   def parse
     @sheet = Sheet.find(params[:sheet_id])
     @sheet.parse_file
+    @sheet = Sheet.find(params[:sheet_id])
+    @sheet.combine_lines
+    @sheet = Sheet.find(params[:sheet_id])
     
     flash[:notice] = "Data imported from file"
     render :show

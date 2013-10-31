@@ -1,0 +1,6 @@
+-title("Create New Client")
+
+=simple_form_for @client do |f|
+  =f.input :abbrev, :label => "Abbreviation to be replaced"
+  =f.input :name, :label => "Replacement"
+  =f.submit "Save"

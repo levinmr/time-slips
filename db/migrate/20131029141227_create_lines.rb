@@ -2,7 +2,7 @@ class CreateLines < ActiveRecord::Migration
   def up
     create_table :lines do |t|
       t.belongs_to :sheet
-      t.string :date
+      t.date :date
       t.float :time
       t.text :description
       t.timestamps

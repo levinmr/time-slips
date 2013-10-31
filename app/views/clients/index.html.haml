@@ -1,0 +1,15 @@
+-title("All Clients")
+
+=link_to "New Client", new_client_path
+
+%table{:style => 'width:500px'}
+  %tr
+    %td.t
+      %h5 Name
+    %td.t
+      %h5 Destroy
+
+  -@clients.each do |c|
+    %tr
+      %td.t= link_to "#{c.abbrev} -> #{c.name}", edit_client_path(c)
+      %td.t= link_to "Destroy", client_path(c), :confirm => 'Are you sure?', :method => :delete

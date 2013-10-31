@@ -1,0 +1,15 @@
+-title("All Changes")
+
+=link_to "New Change", new_change_path
+
+%table{:style => 'width:500px'}
+  %tr
+    %td.t
+      %h5 Name
+    %td.t
+      %h5 Destroy
+
+  -@changes.each do |c|
+    %tr
+      %td.t= link_to "#{c.abbrev} -> #{c.name}", edit_change_path(c)
+      %td.t= link_to "Destroy", change_path(c), :confirm => 'Are you sure?', :method => :delete

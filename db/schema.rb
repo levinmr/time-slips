@@ -29,7 +29,7 @@ ActiveRecord::Schema.define(:version => 20131029141603) do
 
   create_table "lines", :force => true do |t|
     t.integer  "sheet_id"
-    t.string   "date"
+    t.date     "date"
     t.float    "time"
     t.text     "description"
     t.datetime "created_at",  :null => false

@@ -1,0 +1,6 @@
+-title("Create New Change")
+
+=simple_form_for @change do |f|
+  =f.input :abbrev, :label => "Word to be replaced"
+  =f.input :name, :label => "Replacement"
+  =f.submit "Save"
