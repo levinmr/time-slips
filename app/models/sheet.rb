@@ -142,8 +142,10 @@ class Sheet < ActiveRecord::Base
         if need_combined.size > 1
           parent = need_combined.first
           (need_combined.size-1).times do |x|
-            parent.time = parent.time + need_combined[x+1].time
-            parent.description = parent.description + "; " + need_combined[x+1].description
+            if need_combined[x+1].id != parent.id
+              parent.time = parent.time + need_combined[x+1].time
+              parent.description = parent.description + "; " + need_combined[x+1].description
+            end
           end
           parent.save
           need_combined = need_combined.select{|n| n.id != parent.id}
