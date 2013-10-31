@@ -18,12 +18,12 @@ class SheetsController < ApplicationController
 
   def create
     @sheet = Sheet.new(params[:sheet])
-
+    
     if @sheet.save
       redirect_to( sheets_path, :notice => "Sheet created successfully.")
     else
-      flash[:error] = "Error creating Sheet"
-      render :new
+      @sheets = Sheet.all.sort_by{ |s| s.name.downcase }
+      render :index
     end
   end
 

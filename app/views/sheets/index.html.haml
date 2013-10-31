@@ -11,8 +11,11 @@
 %table
 -@sheets.each do |s|
   %tr
-    %td=link_to s.name, sheet_path(s)
-    %td=link_to "Parse File", sheet_parse_path(s)
-    %td=link_to "Delete", sheet_path(s), :method => :delete, :confirm => "Are You Sure?"
+    %td.t
+      =link_to s.name, sheet_path(s)
+    %td.t
+      =link_to "Parse File", sheet_parse_path(s)
+    %td.t
+      =link_to "Delete", sheet_path(s), :method => :delete, :confirm => "Are You Sure?"
     
     
