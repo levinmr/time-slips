@@ -1,5 +1,5 @@
 class Sheet < ActiveRecord::Base
-  has_many :lines
+  has_many :lines, :dependent => :destroy
   
   attr_protected :id
   
@@ -43,7 +43,7 @@ class Sheet < ActiveRecord::Base
   end
   
   def get_time_and_client_return_description(l)
-    desc = l.description  
+    desc = l.description 
     desc = desc.gsub(/\u2013|\u2014/, "-")
     time_cust = ''
     
@@ -77,7 +77,7 @@ class Sheet < ActiveRecord::Base
     dig1 = test[0].to_i
     dig2 = test[1].to_i
     
-    !dig1.nil? && !dig2.nil? && dig1 > 1 && dig2 > 1 && dig1 < 13 && dig2 < 32
+    !dig1.nil? && !dig2.nil? && dig1 > 0 && dig2 > 0 && dig1 < 13 && dig2 < 32
   end
   
   def get_cust_name(str)

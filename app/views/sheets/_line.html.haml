@@ -1,7 +1,7 @@
 %table
   %tr
     %td= "Date: "
-    %td= l.date.strftime("%m/%d/%y")
+    %td= l.date.strftime("%m/%d/%y") unless l.date.nil?
   %tr
     %td= "Client: "
     %td= (l.client.nil? ? "" : l.client.name)
