@@ -130,7 +130,7 @@ class Sheet < ActiveRecord::Base
     punctuation = (str.split('').last =~ /[[:alpha:]]/ ? nil : str.split('').last)
     punctuation = nil if punctuation == '/' || punctuation == ':'
     new_str = (punctuation.nil? ? str : str[0..-1])
-    stripped_str = new_str.downcase if !stripped_str.nil?
+    stripped_str = new_str.downcase if !new_str.nil?
     @changes = Change.all
     @changes.each do |c|
       if stripped_str == c.abbrev.downcase
