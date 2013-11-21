@@ -103,18 +103,20 @@ class Sheet < ActiveRecord::Base
     
     #split by spaces to get every individual word.  Check each word against the changes listed in the DB.
     str_array = str.split(' ')
-    str_array.length.times do |x|
-      str_array[x] = convert_word(str_array[x])
-    end
     
     #reassemble the string
     str_array.length.times do |x|
       #if it's the beginning of the string, or right after punctuation, then capitalize the word.
       word = str_array[x]
-      if x == 0 || (!str_array[x-1].nil? && !(str_array[x-1].split(//).last =~ /[[:alpha:]]/))
-        word = word.capitalize if !word.nil?
-      elsif word.length == 2 && !(str_array[x].split(//).last =~ /[[:alpha:]]/)
-        word = word.capitalize if !word.nil?
+      str_array[x] = convert_word(str_array[x])
+      if word != str_array[x]
+        word = str_array[x]
+      else
+        if x == 0 || (!str_array[x-1].nil? && !(str_array[x-1].split(//).last =~ /[[:alpha:]]/))
+          word = word.capitalize if !word.nil?
+        elsif word.length == 2 && !(str_array[x].split(//).last =~ /[[:alpha:]]/)
+          word = word.capitalize if !word.nil?
+        end
       end
       #Add a space after each word.
       converted_str = converted_str + word.to_s + ' '
@@ -126,16 +128,16 @@ class Sheet < ActiveRecord::Base
   def convert_word(str)
     punctuation = (str.split('').last =~ /[[:alpha:]]/ ? nil : str.split('').last)
     punctuation = nil if punctuation == '/' || punctuation == ':'
-    new_str = (punctuation.nil? ? str : str[0..-1])
-    new_str = new_str.downcase if !new_str.nil?
+    stripped_str = (punctuation.nil? ? str : str[0..-1])
+    stripped_str = stripped_str.downcase if !stripped_str.nil?
     @changes = Change.all
     @changes.each do |c|
-      if new_str == c.abbrev.downcase
-        new_str = c.name.downcase + (punctuation.nil? ? '' : punctuation)
+      if stripped_str == c.abbrev.downcase
+        stripped_str = c.name + (punctuation.nil? ? '' : punctuation)
         break 
       end
     end
-    new_str
+    stripped_str
   end
   
   def combine_lines
