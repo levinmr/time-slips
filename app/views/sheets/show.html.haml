@@ -1,5 +1,7 @@
 -title("Time-Slips info for: #{@sheet.name}")
 
+=link_to "Create File to be imported", sheet_output_path(@sheet)
+
 -@sheet.lines.each do |l|
   =render "line", :l => l
   

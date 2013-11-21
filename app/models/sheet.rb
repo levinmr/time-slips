@@ -8,8 +8,9 @@ class Sheet < ActiveRecord::Base
   mount_uploader :file, SheetUploader
   
   def parse_file
-    lines.each do |l|
-      l.destroy
+    l = Line.where("sheet_id = ? or sheet_id is null", self.id)
+    l.each do |line|
+      line.destroy
     end
     
     f = Docx::Document.open(open(file.to_s, :ssl_verify_mode => OpenSSL::SSL::VERIFY_NONE))
@@ -38,6 +39,7 @@ class Sheet < ActiveRecord::Base
         l.save
       end
     end
+    combine_lines
   end
   
   def get_time_and_client_return_description(l)
@@ -56,6 +58,11 @@ class Sheet < ActiveRecord::Base
     cust_name = '%' + get_cust_name(time_cust).downcase + '%'
     logger.info("client.abbrev LIKE #{cust_name}")
     l.client = Client.where('lower(abbrev) like ?', cust_name).first
+    if l.client.nil?
+      c = Client.new({:abbrev => get_cust_name(time_cust).titleize, :name => get_cust_name(time_cust).titleize})
+      c.save
+      l.client_id = c.id
+    end
     #parse the hours worked
     l.time = get_time(time_cust)
     l.save
@@ -138,25 +145,19 @@ class Sheet < ActiveRecord::Base
       current_lines = lines.select{ |l| l.date == date}
       customers = current_lines.uniq{ |c| c.client_id}.collect{ |c| c.client_id}
       customers.each do |cust|
-        need_combined = current_lines.select{ |l| l.client_id == cust}
+        need_combined = lines.select{ |l| l.date == date && l.client_id == cust}
         if need_combined.size > 1
           parent = need_combined.first
-          (need_combined.size-1).times do |x|
-            if need_combined[x+1].id != parent.id
-              parent.time = parent.time + need_combined[x+1].time
-              parent.description = parent.description + "; " + need_combined[x+1].description
+          need_combined.each do |x|
+            if x.id != parent.id && !x.destroyed?
+              parent.time = parent.time + x.time
+              parent.description = parent.description + "; " + x.description
+              x.destroy
             end
           end
           parent.save
-          need_combined = need_combined.select{|n| n.id != parent.id}
-          need_combined.each do |n|
-            need_deleted << n
-          end
         end
       end
-    end
-    need_deleted.each do |n|
-      n.destroy
     end
   end
 end

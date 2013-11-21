@@ -48,11 +48,21 @@ class SheetsController < ApplicationController
   def parse
     @sheet = Sheet.find(params[:sheet_id])
     @sheet.parse_file
-    @sheet = Sheet.find(params[:sheet_id])
-    @sheet.combine_lines
-    @sheet = Sheet.find(params[:sheet_id])
     
     flash[:notice] = "Data imported from file"
-    render :show
+    redirect_to sheet_path(@sheet)
+  end
+  
+  def output
+    @sheet = Sheet.find(params[:sheet_id])
+    @content = ''
+    @sheet.lines.each do |l|
+      if @sheet.lines.first.id != l.id
+        @content = @content + ','
+      end
+      @content = @content + '"' + l.date.to_s + '","' + l.client.name + '",' + l.time.to_s + ',"' + l.description + '"'
+    end
+    
+    send_data @content, :type => 'text', :disposition => "attachment; filename=import_me.txt"
   end
 end
