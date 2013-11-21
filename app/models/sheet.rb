@@ -107,15 +107,16 @@ class Sheet < ActiveRecord::Base
     #reassemble the string
     str_array.length.times do |x|
       #if it's the beginning of the string, or right after punctuation, then capitalize the word.
+      str_array[x] = str_array[x].downcase
       word = str_array[x]
       str_array[x] = convert_word(str_array[x])
       if word != str_array[x]
         word = str_array[x]
       else
-        if x == 0 || (!str_array[x-1].nil? && !(str_array[x-1].split(//).last =~ /[[:alpha:]]/))
-          word = word.capitalize if !word.nil?
-        elsif word.length == 2 && !(str_array[x].split(//).last =~ /[[:alpha:]]/)
-          word = word.capitalize if !word.nil?
+        if x == 0 || (!str_array[x-1].nil? && !(str_array[x-1].split(//).last =~ /[a-zA-Z0-9]/))
+          word = word.titleize if !word.nil?
+        elsif word.length == 2 && !(str_array[x].split(//).last =~ /[a-zA-Z0-9]/)
+          word = word.titleize if !word.nil?
         end
       end
       #Add a space after each word.
@@ -128,16 +129,16 @@ class Sheet < ActiveRecord::Base
   def convert_word(str)
     punctuation = (str.split('').last =~ /[[:alpha:]]/ ? nil : str.split('').last)
     punctuation = nil if punctuation == '/' || punctuation == ':'
-    stripped_str = (punctuation.nil? ? str : str[0..-1])
-    stripped_str = stripped_str.downcase if !stripped_str.nil?
+    new_str = (punctuation.nil? ? str : str[0..-1])
+    stripped_str = new_str.downcase if !stripped_str.nil?
     @changes = Change.all
     @changes.each do |c|
       if stripped_str == c.abbrev.downcase
-        stripped_str = c.name + (punctuation.nil? ? '' : punctuation)
+        new_str = c.name + (punctuation.nil? ? '' : punctuation)
         break 
       end
     end
-    stripped_str
+    new_str
   end
   
   def combine_lines
