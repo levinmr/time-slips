@@ -60,7 +60,7 @@ class SheetsController < ApplicationController
       if @sheet.lines.first.id != l.id
         @content = @content + ','
       end
-      @content = @content + '"' + l.date.to_s.strftime("%M/%D/%Y") + '","' + l.client.name + '",' + l.time.to_s + ',"' + l.description + '"'
+      @content = @content + '"' + l.date.strftime("%M/%D/%Y") + '","' + l.client.name + '",' + l.time.to_s + ',"' + l.description + '"'
     end
     
     send_data @content, :type => 'text', :disposition => "attachment; filename=import_me.txt"
