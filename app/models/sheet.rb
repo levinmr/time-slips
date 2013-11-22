@@ -116,9 +116,9 @@ class Sheet < ActiveRecord::Base
           word[0] = word[0].upcase unless word.nil?
         end
       else
-        if x == 0 || (!str_array[x-1].nil? && !(str_array[x-1].split(//).last =~ /[a-zA-Z0-9;']/))
+        if x == 0 || (!str_array[x-1].nil? && !(str_array[x-1].split(//).last =~ /[a-zA-Z0-9;' ]/))
           word = word.titleize if !word.nil?
-        elsif word.length == 2 && !(str_array[x].split(//).last =~ /[a-zA-Z0-9;']/)
+        elsif word.length == 2 && !(str_array[x].split(//).last =~ /[a-zA-Z0-9;' ]/)
           word = word.titleize if !word.nil?
         end
       end
