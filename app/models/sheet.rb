@@ -112,7 +112,7 @@ class Sheet < ActiveRecord::Base
       str_array[x] = convert_word(str_array[x])
       if word != str_array[x]
         word = str_array[x]
-        if x == 0 || (!str_array[x-1].nil? && !(str_array[x-1].split(//).last =~ /[a-zA-Z0-9]/))
+        if x == 0 || (!str_array[x-1].nil? && !(str_array[x-1].split(//).last =~ /[a-zA-Z0-9;' ]/))
           word[0] = word[0].upcase unless word.nil?
         end
       else
