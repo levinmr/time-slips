@@ -60,7 +60,7 @@ class SheetsController < ApplicationController
       if @sheet.lines.first.id != l.id
         @content = @content + ','
       end
-      @content = @content + '"AJV", "none", "' + l.date.strftime("%m/%d/%Y") + '","' + l.client.name + '",' + l.time.to_s + ',"' + l.description + '"'
+      @content = @content + '<timeslip>"AJV", "None", "' + l.date.strftime("%m/%d/%Y") + '","' + l.client.name + '",' + l.time.to_s + ',"' + l.description + '"</timeslip>'
     end
     
     send_data @content, :type => 'text', :disposition => "attachment; filename=import_me.txt"

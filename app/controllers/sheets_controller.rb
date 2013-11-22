@@ -57,9 +57,6 @@ class SheetsController < ApplicationController
     @sheet = Sheet.find(params[:sheet_id])
     @content = ''
     @sheet.lines.each do |l|
-      if @sheet.lines.first.id != l.id
-        @content = @content + ','
-      end
       @content = @content + '<timeslip>"AJV", "None", "' + l.date.strftime("%m/%d/%Y") + '","' + l.client.name + '",' + l.time.to_s + ',"' + l.description + '"</timeslip>'
     end
     
