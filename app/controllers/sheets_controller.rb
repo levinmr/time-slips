@@ -57,7 +57,10 @@ class SheetsController < ApplicationController
     @sheet = Sheet.find(params[:sheet_id])
     @content = ''
     @sheet.lines.each do |l|
-      @content = @content + '<timeslip>"AJV", "None", "' + l.date.strftime("%m/%d/%Y") + '","' + l.client.name + '",' + l.time.to_s + ',"' + l.description + '"</timeslip>'
+      if @sheet.lines.first.id != l.id && @sheet.lines.last.id != l.id
+        @content = @content + '||'
+      end
+      @content = @content + '"AJV", "None", "' + l.date.strftime("%m/%d/%Y") + '","' + l.client.name + '",' + l.time.to_s + ',"' + l.description + '"'
     end
     
     send_data @content, :type => 'text', :disposition => "attachment; filename=import_me.txt"
