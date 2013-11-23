@@ -122,8 +122,24 @@ class Sheet < ActiveRecord::Base
           word = word.titleize if !word.nil?
         end
       end
+      str_array[x] = word
+    end
+
+    str_array.length.times do |x|
+      if str_array[x].downcase == 'notice'
+        if !str_array[x+1].nil? && str_array[x+1].downcase == 'of'
+          if !str_array[x+2].nil? && str_array[x+2].downcase[0..6] == 'hearing'
+            str_array[x] = 'Notice'
+            end_str = (str_array[x+2].length > 7 ? str_array[x+2][6..str_array[x+2].length-1] : "")
+            str_array[x+2] = 'Hearing' + end_str        
+          end
+        end
+      end 
+    end
+
+    str_array.length.times do |x|
       #Add a space after each word.
-      converted_str = converted_str + word.to_s + ' '
+      converted_str = converted_str + str_array[x].to_s + ' '
     end
     converted_str = converted_str.strip
     converted_str

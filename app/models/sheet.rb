@@ -102,8 +102,16 @@ class Sheet < ActiveRecord::Base
     converted_str = ''
     
     #split by spaces to get every individual word.  Check each word against the changes listed in the DB.
-    str_array = str.split(' ')
+    old_str_array = str.split(' ')
     
+    str_array = []
+
+    old_str_array.length.times do |x|
+      if !old_str_array[x].blank?
+        str_array << old_str_array[x]
+      end
+    end
+
     #reassemble the string
     str_array.length.times do |x|
       #if it's the beginning of the string, or right after punctuation, then capitalize the word.
@@ -130,7 +138,7 @@ class Sheet < ActiveRecord::Base
         if !str_array[x+1].nil? && str_array[x+1].downcase == 'of'
           if !str_array[x+2].nil? && str_array[x+2].downcase[0..6] == 'hearing'
             str_array[x] = 'Notice'
-            end_str = (str_array[x+2].length > 6 ? str_array[x+2][6..str_array[x+2].length] : "")
+            end_str = (str_array[x+2].length > 7 ? str_array[x+2][6..str_array[x+2].length-1] : "")
             str_array[x+2] = 'Hearing' + end_str        
           end
         end
