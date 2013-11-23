@@ -39,9 +39,8 @@ class LinesController < ApplicationController
 
   def destroy
     @line= Line.find(params[:id])
-    @sheet = @line.sheet
     @line.destroy
     flash[:notice] = "Line deleted."
-    redirect_to(sheet_path(@sheet))
+    redirect_to(lines_path)
   end
 end
