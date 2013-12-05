@@ -208,7 +208,7 @@ class Sheet < ActiveRecord::Base
       slash_index = str.index('/')
       new_str = convert_word(str[0..(slash_index-1)]) + '/' + convert_word(str[(slash_index+1)..str.length])
     else
-      punctuation = (str.split('').last =~ /[.?!;]/ ? str.split(//).last : nil)
+      punctuation = (str.split('').last =~ /[.?!;]/ ? str.split('').last : nil)
       new_str = (punctuation.nil? ? str.downcase : str[0..-2].downcase)
       possessive = (new_str.include?("'s") ? true : false)
       new_str = new_str[0..-3] if possessive == true
