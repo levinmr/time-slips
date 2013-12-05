@@ -129,9 +129,9 @@ class Sheet < ActiveRecord::Base
         end
       else
         if x == 0 || (!str_array[x-1].nil? && (str_array[x-1].split(//).last =~ /[.?!]/))
-          word[0] = word[0].upcase if !word.nil?
+          word[0] = word[0].upcase unless word.nil?
         elsif word.length == 2 && (str_array[x].split(//).last =~ /[.?!]/)
-          word[0] = word[0].upcase if !word.nil?
+          word[0] = word[0].upcase unless word.nil?
         end
       end
       str_array[x] = word
@@ -206,22 +206,22 @@ class Sheet < ActiveRecord::Base
   def convert_word(str)
     if str.length > 2 && str.include?('/')
       slash_index = str.index('/')
-      str = convert_word(str[0..(slash_index-1)]) + '/' + convert_word(str[(slash_index+1)..str.length])
+      new_str = convert_word(str[0..(slash_index-1)]) + '/' + convert_word(str[(slash_index+1)..str.length])
     else
       punctuation = (str.split('').last =~ /[.?!;]/ ? str.split(//).last : nil)
       new_str = (punctuation.nil? ? str.downcase : str[0..-2].downcase)
       possessive = (new_str.include?("'s") ? true : false)
       new_str = new_str[0..-3] if possessive == true
-      stripped_str = new_str if !new_str.nil?
       @changes = Change.all
       @changes.each do |c|
-        if stripped_str == c.abbrev.downcase
+        if new_str == c.abbrev.downcase
           new_str = c.name
           break 
         end
       end
-      new_str + (possessive == true ? "'s" : "") + (punctuation.nil? ? '' : punctuation)
+      new_str = new_str + (possessive == true ? "'s" : "") + (punctuation.nil? ? "" : punctuation)
     end
+    new_str
   end
   
   def combine_lines

@@ -129,9 +129,9 @@ class Sheet < ActiveRecord::Base
         end
       else
         if x == 0 || (!str_array[x-1].nil? && (str_array[x-1].split(//).last =~ /[.?!]/))
-          word[0] = word[0].upcase if !word.nil?
+          word[0] = word[0].upcase unless word.nil?
         elsif word.length == 2 && (str_array[x].split(//).last =~ /[.?!]/)
-          word[0] = word[0].upcase if !word.nil?
+          word[0] = word[0].upcase unless word.nil?
         end
       end
       str_array[x] = word
@@ -210,15 +210,16 @@ class Sheet < ActiveRecord::Base
     else
       punctuation = (str.split('').last =~ /[.?!;]/ ? str.split(//).last : nil)
       new_str = (punctuation.nil? ? str.downcase : str[0..-2].downcase)
-      stripped_str = new_str if !new_str.nil?
+      possessive = (new_str.include?("'s") ? true : false)
+      new_str = new_str[0..-3] if possessive == true
       @changes = Change.all
       @changes.each do |c|
-        if stripped_str == c.abbrev.downcase
+        if new_str == c.abbrev.downcase
           new_str = c.name
           break 
         end
       end
-      new_str + (punctuation.nil? ? '' : punctuation)
+      new_str + (possessive == true ? "'s" : "") + (punctuation.nil? ? "" : punctuation)
     end
   end
   
