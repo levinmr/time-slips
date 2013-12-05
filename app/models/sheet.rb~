@@ -161,8 +161,8 @@ class Sheet < ActiveRecord::Base
   end
   
   def convert_word(str)
-    punctuation = (str.split('').last =~ /[.?!;]/ ? str.split('').last : nil)
-    new_str = (punctuation.nil? ? str : str[0..-1])
+    punctuation = (str.split('').last =~ /[.?!;]/ ? str.split(//).last : nil)
+    new_str = (punctuation.nil? ? str : str[0..-2])
     stripped_str = new_str.downcase if !new_str.nil?
     @changes = Change.all
     @changes.each do |c|

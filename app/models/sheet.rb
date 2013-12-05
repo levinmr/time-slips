@@ -162,16 +162,16 @@ class Sheet < ActiveRecord::Base
   
   def convert_word(str)
     punctuation = (str.split('').last =~ /[.?!;]/ ? str.split(//).last : nil)
-    new_str = (punctuation.nil? ? str : str[0..-2])
-    stripped_str = new_str.downcase if !new_str.nil?
+    new_str = (punctuation.nil? ? str.downcase : str[0..-2].downcase)
+    stripped_str = new_str if !new_str.nil?
     @changes = Change.all
     @changes.each do |c|
       if stripped_str == c.abbrev.downcase
-        new_str = c.name + (punctuation.nil? ? '' : punctuation)
+        new_str = c.name
         break 
       end
     end
-    new_str
+    new_str + (punctuation.nil? ? '' : punctuation)
   end
   
   def combine_lines
