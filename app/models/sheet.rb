@@ -105,9 +105,17 @@ class Sheet < ActiveRecord::Base
     str.to_f
   end
   
-  def convert_changes(str)
-    converted_str = ''
-    
+  def convert_changes(str)    
+    changed_str = str.downcase
+    str.length.times do |x|
+      if str[x] == '/'
+        if !str[x-1].nil? && str[x-1].downcase == 'w'
+          if !str[x-2].nil? && !str[x-2] == ' ' && (!str[x+1].nil?  && str[x+1] == ' ')
+            changed_str = changed_str[0..x] + changed_str[(x+2)..changed_str.length]
+          end
+        end
+      end
+    end
     #split by spaces to get every individual word.  Check each word against the changes listed in the DB.
     old_str_array = str.split(' ')
     
@@ -143,15 +151,61 @@ class Sheet < ActiveRecord::Base
     str_array.length.times do |x|
       if str_array[x].downcase == 'notice'
         if !str_array[x+1].nil? && str_array[x+1].downcase == 'of'
-          if !str_array[x+2].nil? && str_array[x+2].downcase[0..6] == 'hearing'
+          if !str_array[x+2].nil? 
             str_array[x] = 'Notice'
-            end_str = (str_array[x+2].length > 7 ? str_array[x+2][6..str_array[x+2].length-1] : "")
-            str_array[x+2] = 'Hearing' + end_str        
+            str_array[x+2] = str_array[x+2][0].upcase + str_array[x+2][1..str_array[x+2].length]
           end
         end
       end 
     end
 
+    str_array.length.times do |x|
+      if str_array[x].downcase == 'borough'
+        if !str_array[x+1].nil? && str_array[x+1].downcase == 'of'
+          if !str_array[x+2].nil? 
+            str_array[x] = 'Borough'
+            str_array[x+2] = str_array[x+2][0].upcase + str_array[x+2][1..str_array[x+2].length]
+          end
+        end
+      end 
+    end
+
+    str_array.length.times do |x|
+      if str_array[x].downcase == 'reply'
+        if !str_array[x+1].nil? && str_array[x+1].downcase == 'to'
+          if !str_array[x+2].nil? && str_array[x+2].downcase == 'new'
+            if !str_array[x+3].nil? && str_array[x+3].downcase == 'matter'
+              str_array[x] = 'Reply'
+              str_array[x+2] = 'New'
+              str_array[x+3] = 'Matter'
+            end
+          end
+        end
+      end 
+    end
+
+    str_array.length.times do |x|
+      if str_array[x].downcase == 'interrogatories'
+        if !str_array[x+1].nil? && str_array[x+1].downcase == 'and'
+          if !str_array[x+2].nil? && str_array[x+2].downcase == 'request'
+            if !str_array[x+3].nil? && str_array[x+3].downcase == 'for'
+              if !str_array[x+4].nil? && str_array[x+4].downcase == 'production'
+                if !str_array[x+5].nil? && str_array[x+5].downcase == 'of'
+                  if !str_array[x+6].nil? && str_array[x+6].downcase == 'documents'
+                    str_array[x] = 'Interrogatories'
+                    str_array[x+2] = 'Request'
+                    str_array[x+4] = 'Production'
+                    str_array[x+6] = 'Documents'
+                  end
+                end
+              end
+            end
+          end
+        end
+      end 
+    end
+
+    converted_str = ''
     str_array.length.times do |x|
       #Add a space after each word.
       converted_str = converted_str + str_array[x].to_s + ' '
