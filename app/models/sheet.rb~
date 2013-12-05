@@ -35,11 +35,18 @@ class Sheet < ActiveRecord::Base
       unless l.destroyed?
         desc = get_time_and_client_return_description(l)
         
-        l.description = convert_changes(desc)
+        l.description = desc
         l.save
       end
     end
     combine_lines
+    new_lines = Line.where("sheet_id = ?", self.id)
+    new_lines.each do |l|
+      unless l.destroyed?
+        l.description = convert_changes(l.description)
+        l.save
+      end
+    end
   end
   
   def get_time_and_client_return_description(l)
@@ -120,13 +127,13 @@ class Sheet < ActiveRecord::Base
       str_array[x] = convert_word(str_array[x])
       if word != str_array[x]
         word = str_array[x]
-        if x == 0 || (!str_array[x-1].nil? && !(str_array[x-1].split(//).last =~ /[a-zA-Z0-9;' ]/))
+        if x == 0 || (!str_array[x-1].nil? && (str_array[x-1].split(//).last =~ /[.?!]/))
           word[0] = word[0].upcase unless word.nil?
         end
       else
-        if x == 0 || (!str_array[x-1].nil? && !(str_array[x-1].split(//).last =~ /[a-zA-Z0-9;' ]/))
+        if x == 0 || (!str_array[x-1].nil? && (str_array[x-1].split(//).last =~ /[.?!]/))
           word = word.titleize if !word.nil?
-        elsif word.length == 2 && !(str_array[x].split(//).last =~ /[a-zA-Z0-9;' ]/)
+        elsif word.length == 2 && (str_array[x].split(//).last =~ /[.?!]/)
           word = word.titleize if !word.nil?
         end
       end
@@ -170,7 +177,6 @@ class Sheet < ActiveRecord::Base
   
   def combine_lines
     dates = lines.uniq{ |l| l.date }.collect{ |l| l.date}
-    need_deleted = []
     dates.each do |date|
       current_lines = lines.select{ |l| l.date == date}
       customers = current_lines.uniq{ |c| c.client_id}.collect{ |c| c.client_id}
