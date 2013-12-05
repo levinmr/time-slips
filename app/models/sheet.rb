@@ -106,16 +106,6 @@ class Sheet < ActiveRecord::Base
   end
   
   def convert_changes(str)    
-    changed_str = str.downcase
-    str.length.times do |x|
-      if str[x] == '/'
-        if !str[x-1].nil? && str[x-1].downcase == 'w'
-          if !str[x-2].nil? && !str[x-2] == ' ' && (!str[x+1].nil?  && str[x+1] == ' ')
-            changed_str = changed_str[0..x] + changed_str[(x+2)..changed_str.length]
-          end
-        end
-      end
-    end
     #split by spaces to get every individual word.  Check each word against the changes listed in the DB.
     old_str_array = str.split(' ')
     
@@ -123,14 +113,13 @@ class Sheet < ActiveRecord::Base
 
     old_str_array.length.times do |x|
       if !old_str_array[x].blank?
-        str_array << old_str_array[x]
+        str_array << old_str_array[x].downcase
       end
     end
 
     #reassemble the string
     str_array.length.times do |x|
       #if it's the beginning of the string, or right after punctuation, then capitalize the word.
-      str_array[x] = str_array[x].downcase
       word = str_array[x]
       str_array[x] = convert_word(str_array[x])
       if word != str_array[x]
@@ -215,17 +204,24 @@ class Sheet < ActiveRecord::Base
   end
   
   def convert_word(str)
-    punctuation = (str.split('').last =~ /[.?!;]/ ? str.split(//).last : nil)
-    new_str = (punctuation.nil? ? str.downcase : str[0..-2].downcase)
-    stripped_str = new_str if !new_str.nil?
-    @changes = Change.all
-    @changes.each do |c|
-      if stripped_str == c.abbrev.downcase
-        new_str = c.name
-        break 
+    if str.length > 2 && str.include?('/')
+      slash_index = str.index('/')
+      str = convert_word(str[0..(slash_index-1)]) + '/' + convert_word(str[(slash_index+1)..str.length])
+    else
+      punctuation = (str.split('').last =~ /[.?!;]/ ? str.split(//).last : nil)
+      new_str = (punctuation.nil? ? str.downcase : str[0..-2].downcase)
+      possessive = (new_str.include?("'s") ? true : false)
+      new_str = new_str[0..-3] if possessive == true
+      stripped_str = new_str if !new_str.nil?
+      @changes = Change.all
+      @changes.each do |c|
+        if stripped_str == c.abbrev.downcase
+          new_str = c.name
+          break 
+        end
       end
+      new_str + (possessive == true ? "'s" : "") + (punctuation.nil? ? '' : punctuation)
     end
-    new_str + (punctuation.nil? ? '' : punctuation)
   end
   
   def combine_lines
