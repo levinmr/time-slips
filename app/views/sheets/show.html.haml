@@ -1,5 +1,8 @@
 -title("Time-Slips info for: #{@sheet.name}")
 
+%p= "Number of Lines: #{@sheet.lines.size}"
+%p
+
 =link_to "Create File to be imported", sheet_output_path(@sheet)
 
 -@sheet.lines.each do |l|
