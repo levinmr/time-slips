@@ -149,6 +149,17 @@ class Sheet < ActiveRecord::Base
     end
 
     str_array.length.times do |x|
+      if str_array[x].downcase == 'motion'
+        if !str_array[x+1].nil? && str_array[x+1].downcase == 'to'
+          if !str_array[x+2].nil? 
+            str_array[x] = 'Motion'
+            str_array[x+2] = str_array[x+2][0].upcase + str_array[x+2][1..str_array[x+2].length]
+          end
+        end
+      end 
+    end
+
+    str_array.length.times do |x|
       if str_array[x].downcase == 'borough'
         if !str_array[x+1].nil? && str_array[x+1].downcase == 'of'
           if !str_array[x+2].nil? 

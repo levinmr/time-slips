@@ -21,6 +21,7 @@ class Sheet < ActiveRecord::Base
       para = p.to_s
       if is_date?(para)
         current_date = Date.parse para
+        current_date.change(year: 1.month.ago.year)
       else
         if !para.blank?
           @line = Line.new({:date => current_date, :description => para, :sheet_id => self.id})
