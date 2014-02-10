@@ -210,11 +210,12 @@ class Sheet < ActiveRecord::Base
       if str_array[x] == 'fof/col' || 'fof/col;'
         before = str_array[0..x-1]
         after = str_array[x+1..str_array.length]
-        semi = true if str_array[x].last == ';'
+        semi = true if str_array[x][str_array[x].length] == ';'
         new_array = ["Findings", "of", "Fact", "and", "Conclusions", "of", "Law" + (semi == true ? ";" : "")]
         str_array = before + new_array + after
-        break
+        break_it = true
       end
+      break if break_it == true
     end
 
     converted_str = ''
