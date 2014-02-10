@@ -231,7 +231,7 @@ class Sheet < ActiveRecord::Base
     if str.length > 2 && str.include?('-')
       slash_index = str.index('-')
       new_str = convert_word(str[0..(slash_index-1)]) + '-' + convert_word(str[(slash_index+1)..str.length])
-    if str.length > 2 && str.include?('/')
+    elsif str.length > 2 && str.include?('/')
       slash_index = str.index('/')
       new_str = convert_word(str[0..(slash_index-1)]) + '/' + convert_word(str[(slash_index+1)..str.length])
     else
