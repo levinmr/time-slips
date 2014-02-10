@@ -210,7 +210,7 @@ class Sheet < ActiveRecord::Base
       if str_array[x] == 'fof/col' || str_array[x] == 'fof/col;'
         before = str_array[0..x-1]
         after = str_array[x+1..str_array.length]
-        semi = true if str_array[x][str_array[x].length] == ';'
+        semi = true if str_array[x][str_array[x].length-1] == ';'
         new_array = ["Findings", "of", "Fact", "and", "Conclusions", "of", "Law" + (semi == true ? ";" : "")]
         str_array = before + new_array + after
         break_it = true
