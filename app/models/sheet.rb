@@ -20,7 +20,7 @@ class Sheet < ActiveRecord::Base
     f.paragraphs.each do |p|
       para = p.to_s
       if is_date?(para)
-        current_date = Date.parse para
+        current_date = Date.parse convert_date(para)
         current_date.change(year: 1.month.ago.year)
       else
         if !para.blank?
@@ -86,6 +86,11 @@ class Sheet < ActiveRecord::Base
     dig2 = test[1].to_i
     
     !dig1.nil? && !dig2.nil? && dig1 > 0 && dig2 > 0 && dig1 < 13 && dig2 < 32
+  end
+  
+  def convert_date(d)
+    test = d.split('/')
+    test[0] + '/' + test[1] #ignores the year if it was included.
   end
   
   def get_cust_name(str)
