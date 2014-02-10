@@ -205,6 +205,17 @@ class Sheet < ActiveRecord::Base
         end
       end 
     end
+    
+    str_array.length.times do |x|
+      if str_array[x] == 'fof/col' || 'fof/col;'
+        before = str_array[0..x-1]
+        after = str_array[x+1..str_array.length]
+        semi = true if str_array[x].last == ';'
+        new_array = ["Findings", "of", "Fact", "and", "Conclusions", "of", "Law" + (semi == true ? ";" : "")]
+        str_array = before + new_array + after
+        break
+      end
+    end
 
     converted_str = ''
     str_array.length.times do |x|
