@@ -9,7 +9,7 @@ class Sheet < ActiveRecord::Base
 
   def parse_file
     # delete all existing lines for the sheet (since we're replacing them)
-    Line.delete_all('sheet_id = ? or sheet_id is null', id)
+    Line.delete_all("sheet_id = #{id} or sheet_id is null")
 
     f = Docx::Document.open(open(
       file.to_s, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE))
