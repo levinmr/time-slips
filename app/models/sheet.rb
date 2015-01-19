@@ -1,140 +1,135 @@
 class Sheet < ActiveRecord::Base
-  has_many :lines, :dependent => :destroy
-  
-  attr_protected :id
-  
-  validates_presence_of :name, :file
-  
-  mount_uploader :file, SheetUploader
-  
-  def parse_file
-    l = Line.where("sheet_id = ? or sheet_id is null", self.id)
-    l.each do |line|
-      line.destroy
-    end
-    
-    f = Docx::Document.open(open(file.to_s, :ssl_verify_mode => OpenSSL::SSL::VERIFY_NONE))
+  has_many :lines, dependent: :destroy
 
-    #create lines, assign dates properly, and put the rest into description
+  attr_protected :id
+
+  validates_presence_of :name, :file
+
+  mount_uploader :file, SheetUploader
+
+  def parse_file
+    # delete all existing lines for the sheet (since we're replacing them)
+    Line.delete_all('sheet_id = ? or sheet_id is null', id)
+
+    f = Docx::Document.open(open(
+      file.to_s, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE))
+
+    # create lines, assign dates properly, and put the rest into description
     current_date = ''
     f.paragraphs.each do |p|
       para = p.to_s
-      if is_date?(para)
+      if date?(para)
         current_date = Date.parse convert_date(para)
         current_date.change(year: 1.month.ago.year)
       else
-        if !para.blank?
-          @line = Line.new({:date => current_date, :description => para, :sheet_id => self.id})
+        unless para.blank?
+          @line = Line.new(date: current_date,
+                           description: para,
+                           sheet_id: id)
           @line.save
         end
       end
     end
-    
-    #parse the blob of text in the description for the rest of the data.
-    new_lines = Line.where("sheet_id = ?", self.id)
+
+    # parse the blob of text in the description for the rest of the data.
+    new_lines = Line.where(sheet_id: id).select { |l| !l.destroyed? }
     new_lines.each do |l|
-      unless l.destroyed?
-        desc = get_time_and_client_return_description(l)
-        
-        l.description = desc
-        l.save
-      end
+      l.description = get_time_and_client_return_description(l)
+      l.save
     end
     combine_lines
-    new_lines = Line.where("sheet_id = ?", self.id)
+    new_lines = Line.where(sheet_id: id).select { |l| !l.destroyed }
     new_lines.each do |l|
-      unless l.destroyed?
-        l.description = convert_changes(l.description)
-        l.save
-      end
+      l.description = convert_changes(l.description)
+      l.save
     end
   end
-  
+
   def get_time_and_client_return_description(l)
-    desc = l.description 
-    desc = desc.gsub(/\u2013|\u2014/, "-")
+    desc = l.description
+    desc = desc.gsub(/\u2013|\u2014|\u2015/, '-')
     time_cust = ''
-    
+
     first_dash = (desc.index('-').nil? ? 0 : desc.index('-'))
-    time_cust = desc[0..(first_dash-1)]
-    desc = desc[(first_dash+1)..desc.length]
+    time_cust = desc[0..(first_dash - 1)]
+    desc = desc[(first_dash + 1)..desc.length]
     second_dash = desc.index('-')
-    if !second_dash.nil? && second_dash < 2
-      desc = desc[(second_dash+1)]
-    end
-  
+    desc = desc[(second_dash + 1)] if second_dash && second_dash < 2
+
     cust_name = '%' + get_cust_name(time_cust).downcase + '%'
     logger.info("client.abbrev LIKE #{cust_name}")
     l.client = Client.where('lower(abbrev) like ?', cust_name).first
     if l.client.nil?
-      c = Client.new({:abbrev => get_cust_name(time_cust).titleize, :name => get_cust_name(time_cust).titleize})
+      c = Client.create(abbrev: get_cust_name(time_cust).titleize,
+                        name: get_cust_name(time_cust).titleize)
       c.save
       l.client_id = c.id
     end
-    #parse the hours worked
+    # parse the hours worked
     l.time = get_time(time_cust)
     l.save
-    
-    desc = desc.strip
-    desc
+
+    desc.strip
   end
-  
-  def is_date?(d)
+
+  def date?(d)
     test = d.split('/')
-    
+
     dig1 = test[0].to_i
     dig2 = test[1].to_i
-    
+
     !dig1.nil? && !dig2.nil? && dig1 > 0 && dig2 > 0 && dig1 < 13 && dig2 < 32
   end
-  
+
   def convert_date(d)
     test = d.split('/')
-    test[0] + '/' + test[1] #ignores the year if it was included.
+    test[0] + '/' + test[1] # ignores the year if it was included.
   end
-  
+
   def get_cust_name(str)
     arr = str.split('')
     cust_name = ''
     arr.length.times do |x|
       if arr[x] =~ /[[:alpha:]]/
         break
-      else 
-        cust_name = str[(x+1)..str.length]
+      else
+        cust_name = str[(x + 1)..str.length]
       end
     end
     cust_name = cust_name.strip
     cust_name
   end
-  
+
   def get_time(str)
     str.to_f
   end
-  
-  def convert_changes(str)    
-    #split by spaces to get every individual word.  Check each word against the changes listed in the DB.
+
+  def convert_changes(str)
+    # Split by spaces to get every individual word.
+    # Check each word against the changes listed in the DB.
     old_str_array = str.split(' ')
-    
+
     str_array = []
 
     old_str_array.length.times do |x|
-      if !old_str_array[x].blank?
-        str_array << old_str_array[x].downcase
-      end
+      str_array << old_str_array[x].downcase unless old_str_array[x].blank?
     end
 
-    #reassemble the string
+    # Reassemble the string
     str_array.length.times do |x|
-      #if it's the beginning of the string, or right after punctuation, then capitalize the word.
+      # If it's the beginning of the string, or right after punctuation,
+      # then capitalize the word.
       word = str_array[x]
       str_array[x] = convert_word(str_array[x])
       if word != str_array[x]
         word = str_array[x]
-        if x == 0 || (!str_array[x-1].nil? && (str_array[x-1].split('').last =~ /[.?!]/))
+        if x == 0 || (str_array[x - 1] &&
+          (str_array[x - 1].split('').last =~ /[.?!]/))
           word[0] = word[0].upcase unless word.nil?
         end
       else
-        if x == 0 || (!str_array[x-1].nil? && (str_array[x-1].split('').last =~ /[.?!]/))
+        if x == 0 || (str_array[x - 1] &&
+          (str_array[x - 1].split('').last =~ /[.?!]/))
           word[0] = word[0].upcase unless word.nil?
         elsif word.length == 2 && (str_array[x].split('').last =~ /[.?!]/)
           word[0] = word[0].upcase unless word.nil?
@@ -145,35 +140,37 @@ class Sheet < ActiveRecord::Base
 
     str_array.length.times do |x|
       if str_array[x].downcase == 'notice'
-        if !str_array[x+1].nil? && str_array[x+1].downcase == 'of'
-          if !str_array[x+2].nil? 
+        if str_array[x + 1] && str_array[x + 1].downcase == 'of'
+          if str_array[x + 2]
             str_array[x] = 'Notice'
-            str_array[x+2] = str_array[x+2][0].upcase + str_array[x+2][1..str_array[x+2].length]
+            str_array[x + 2] = str_array[x + 2][0].upcase +
+              str_array[x + 2][1..str_array[x + 2].length]
           end
         end
-      end 
+      end
     end
 
     str_array.length.times do |x|
       if str_array[x].downcase == 'motion'
-        if !str_array[x+1].nil? && str_array[x+1].downcase == 'to'
-          if !str_array[x+2].nil? 
+        if str_array[x + 1] && str_array[x + 1].downcase == 'to'
+          if str_array[x + 2]
             str_array[x] = 'Motion'
-            str_array[x+2] = str_array[x+2][0].upcase + str_array[x+2][1..str_array[x+2].length]
+            str_array[x + 2] = str_array[x + 2][0].upcase +
+              str_array[x + 2][1..str_array[x + 2].length]
           end
         end
-      end 
+      end
     end
 
     str_array.length.times do |x|
       if str_array[x].downcase == 'borough'
         if !str_array[x+1].nil? && str_array[x+1].downcase == 'of'
-          if !str_array[x+2].nil? 
+          if !str_array[x+2].nil?
             str_array[x] = 'Borough'
             str_array[x+2] = str_array[x+2][0].upcase + str_array[x+2][1..str_array[x+2].length]
           end
         end
-      end 
+      end
     end
 
     str_array.length.times do |x|
@@ -187,7 +184,7 @@ class Sheet < ActiveRecord::Base
             end
           end
         end
-      end 
+      end
     end
 
     str_array.length.times do |x|
@@ -208,9 +205,9 @@ class Sheet < ActiveRecord::Base
             end
           end
         end
-      end 
+      end
     end
-    
+
     str_array.length.times do |x|
       if str_array[x] == 'fof/col' || str_array[x] == 'fof/col;'
         before = str_array[0..x-1]
@@ -231,7 +228,7 @@ class Sheet < ActiveRecord::Base
     converted_str = converted_str.strip
     converted_str
   end
-  
+
   def convert_word(str)
     if str.length > 2 && str.include?('-')
       slash_index = str.index('-')
@@ -248,14 +245,14 @@ class Sheet < ActiveRecord::Base
       @changes.each do |c|
         if new_str == c.abbrev.downcase
           new_str = c.name
-          break 
+          break
         end
       end
       new_str = new_str + (possessive == true ? "'s" : "") + (punctuation.nil? ? "" : punctuation)
     end
     new_str
   end
-  
+
   def combine_lines
     dates = lines.uniq{ |l| l.date }.collect{ |l| l.date}
     dates.each do |date|
