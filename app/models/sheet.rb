@@ -78,7 +78,7 @@ class Sheet < ActiveRecord::Base
     dig1 = test[0].to_i
     dig2 = test[1].to_i
 
-    !dig1.nil? && !dig2.nil? && dig1 > 0 && dig2 > 0 && dig1 < 13 && dig2 < 32
+    dig1 && dig2 && dig1 > 0 && dig2 > 0 && dig1 < 13 && dig2 < 32
   end
 
   def convert_date(d)
@@ -90,14 +90,9 @@ class Sheet < ActiveRecord::Base
     arr = str.split('')
     cust_name = ''
     arr.length.times do |x|
-      if arr[x] =~ /[[:alpha:]]/
-        break
-      else
-        cust_name = str[(x + 1)..str.length]
-      end
+      arr[x] =~ /[[:alpha:]]/ ? break : cust_name = str[(x + 1)..str.length]
     end
-    cust_name = cust_name.strip
-    cust_name
+    cust_name.strip
   end
 
   def get_time(str)
@@ -164,10 +159,11 @@ class Sheet < ActiveRecord::Base
 
     str_array.length.times do |x|
       if str_array[x].downcase == 'borough'
-        if !str_array[x+1].nil? && str_array[x+1].downcase == 'of'
-          if !str_array[x+2].nil?
+        if str_array[x + 1] && str_array[x + 1].downcase == 'of'
+          if str_array[x + 2]
             str_array[x] = 'Borough'
-            str_array[x+2] = str_array[x+2][0].upcase + str_array[x+2][1..str_array[x+2].length]
+            str_array[x + 2] = str_array[x + 2][0].upcase +
+              str_array[x + 2][1..str_array[x + 2].length]
           end
         end
       end
@@ -175,12 +171,12 @@ class Sheet < ActiveRecord::Base
 
     str_array.length.times do |x|
       if str_array[x].downcase == 'reply'
-        if !str_array[x+1].nil? && str_array[x+1].downcase == 'to'
-          if !str_array[x+2].nil? && str_array[x+2].downcase == 'new'
-            if !str_array[x+3].nil? && str_array[x+3].downcase == 'matter'
+        if str_array[x + 1] && str_array[x + 1].downcase == 'to'
+          if str_array[x + 2] && str_array[x + 2].downcase == 'new'
+            if str_array[x + 3] && str_array[x + 3].downcase == 'matter'
               str_array[x] = 'Reply'
-              str_array[x+2] = 'New'
-              str_array[x+3] = 'Matter'
+              str_array[x + 2] = 'New'
+              str_array[x + 3] = 'Matter'
             end
           end
         end
@@ -189,16 +185,16 @@ class Sheet < ActiveRecord::Base
 
     str_array.length.times do |x|
       if str_array[x].downcase == 'interrogatories'
-        if !str_array[x+1].nil? && str_array[x+1].downcase == 'and'
-          if !str_array[x+2].nil? && str_array[x+2].downcase == 'request'
-            if !str_array[x+3].nil? && str_array[x+3].downcase == 'for'
-              if !str_array[x+4].nil? && str_array[x+4].downcase == 'production'
-                if !str_array[x+5].nil? && str_array[x+5].downcase == 'of'
-                  if !str_array[x+6].nil? && str_array[x+6].downcase == 'documents'
+        if str_array[x + 1] && str_array[x + 1].downcase == 'and'
+          if str_array[x + 2] && str_array[x + 2].downcase == 'request'
+            if str_array[x + 3] && str_array[x + 3].downcase == 'for'
+              if str_array[x + 4] && str_array[x + 4].downcase == 'production'
+                if str_array[x + 5] && str_array[x + 5].downcase == 'of'
+                  if str_array[x + 6] && str_array[x + 6].downcase == 'documents'
                     str_array[x] = 'Interrogatories'
-                    str_array[x+2] = 'Request'
-                    str_array[x+4] = 'Production'
-                    str_array[x+6] = 'Documents'
+                    str_array[x + 2] = 'Request'
+                    str_array[x + 4] = 'Production'
+                    str_array[x + 6] = 'Documents'
                   end
                 end
               end
@@ -210,10 +206,11 @@ class Sheet < ActiveRecord::Base
 
     str_array.length.times do |x|
       if str_array[x] == 'fof/col' || str_array[x] == 'fof/col;'
-        before = str_array[0..x-1]
-        after = str_array[x+1..str_array.length]
-        semi = true if str_array[x][str_array[x].length-1] == ';'
-        new_array = ["Findings", "of", "Fact", "and", "Conclusions", "of", "Law" + (semi == true ? ";" : "")]
+        before = str_array[0..x - 1]
+        after = str_array[x + 1..str_array.length]
+        semi = true if str_array[x][str_array[x].length - 1] == ';'
+        new_array = ['Findings', 'of', 'Fact', 'and', 'Conclusions', 'of',
+                     'Law' + (semi == true ? ';' : '')]
         str_array = before + new_array + after
         break_it = true
       end
@@ -222,22 +219,23 @@ class Sheet < ActiveRecord::Base
 
     converted_str = ''
     str_array.length.times do |x|
-      #Add a space after each word.
+      # Add a space after each word.
       converted_str = converted_str + str_array[x].to_s + ' '
     end
-    converted_str = converted_str.strip
-    converted_str
+    converted_str.strip
   end
 
   def convert_word(str)
     if str.length > 2 && str.include?('-')
       slash_index = str.index('-')
-      new_str = convert_word(str[0..(slash_index-1)]) + '-' + convert_word(str[(slash_index+1)..str.length])
+      new_str = convert_word(str[0..(slash_index - 1)]) + '-' +
+        convert_word(str[(slash_index + 1)..str.length])
     elsif str.length > 2 && str.include?('/')
       slash_index = str.index('/')
-      new_str = convert_word(str[0..(slash_index-1)]) + '/' + convert_word(str[(slash_index+1)..str.length])
+      new_str = convert_word(str[0..(slash_index - 1)]) + '/' +
+        convert_word(str[(slash_index + 1)..str.length])
     else
-      punctuation = (str.split('').last =~ /[.?!;,]/ ? str.split('').last : nil)
+      punctuation = str.split('').last =~ /[.?!;,]/ ? str.split('').last : nil
       new_str = (punctuation.nil? ? str.downcase : str[0..-2].downcase)
       possessive = (new_str.include?("'s") ? true : false)
       new_str = new_str[0..-3] if possessive == true
@@ -248,25 +246,28 @@ class Sheet < ActiveRecord::Base
           break
         end
       end
-      new_str = new_str + (possessive == true ? "'s" : "") + (punctuation.nil? ? "" : punctuation)
+      new_str = new_str + (possessive == true ? "'s" : '') +
+        (punctuation.nil? ? '' : punctuation)
     end
     new_str
   end
 
   def combine_lines
-    dates = lines.uniq{ |l| l.date }.collect{ |l| l.date}
+    dates = lines.uniq { |l| l.date }.map { |l| l.date }
     dates.each do |date|
-      current_lines = lines.select{ |l| l.date == date}
-      customers = current_lines.uniq{ |c| c.client_id}.collect{ |c| c.client_id}
+      customers = lines.select { |l| l.date == date }
+                       .uniq   { |c| c.client_id }
+                       .map    { |c| c.client_id }
       customers.each do |cust|
-        need_combined = lines.select{ |l| l.date == date && l.client_id == cust}
+        need_combined =
+          lines.select { |l| l.date == date && l.client_id == cust }
         if need_combined.size > 1
           parent = need_combined.first
           need_combined.each do |x|
             if x.id != parent.id && !x.destroyed?
               parent.time = parent.time + x.time
-              parent.description = parent.description + "; " + x.description
-              x.destroy
+              parent.description = parent.description + '; ' + x.description
+              x.delete
             end
           end
           parent.save
