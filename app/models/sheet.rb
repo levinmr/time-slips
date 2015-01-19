@@ -99,13 +99,8 @@ class Sheet < ActiveRecord::Base
   def convert_changes(str)
     # Split by spaces to get every individual word.
     # Check each word against the changes listed in the DB.
-    old_str_array = str.split(' ')
-
-    str_array = []
-
-    old_str_array.length.times do |x|
-      str_array << old_str_array[x].downcase unless old_str_array[x].blank?
-    end
+    str_array = str.split(' ').select { |x| !x.blank? }
+                              .map    { |x| x.downcase }
 
     # Reassemble the string
     str_array.length.times do |x|
