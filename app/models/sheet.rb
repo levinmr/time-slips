@@ -48,10 +48,9 @@ class Sheet < ActiveRecord::Base
   def get_time_and_client_return_description(l)
     desc = l.description
     desc = desc.gsub(/\u2013|\u2014|\u2015/, '-')
-    time_cust = ''
 
     first_dash = (desc.index('-').nil? ? 0 : desc.index('-'))
-    time_cust = desc[0..(first_dash - 1)]
+    time_cust = desc[0..(first_dash - 1)] || ''
     desc = desc[(first_dash + 1)..desc.length]
     second_dash = desc.index('-')
     desc = desc[(second_dash + 1)] if second_dash && second_dash < 2
@@ -62,7 +61,6 @@ class Sheet < ActiveRecord::Base
     if l.client.nil?
       c = Client.create(abbrev: get_cust_name(time_cust).titleize,
                         name: get_cust_name(time_cust).titleize)
-      c.save
       l.client_id = c.id
     end
     # parse the hours worked
@@ -74,7 +72,6 @@ class Sheet < ActiveRecord::Base
 
   def date?(d)
     test = d.split('/')
-
     dig1 = test[0].to_i
     dig2 = test[1].to_i
 
@@ -83,7 +80,7 @@ class Sheet < ActiveRecord::Base
 
   def convert_date(d)
     test = d.split('/')
-    test[0] + '/' + test[1] # ignores the year if it was included.
+    "#{test[0]}/#{test[1]}" # ignores the year if it was included.
   end
 
   def get_cust_name(str)
@@ -217,11 +214,7 @@ class Sheet < ActiveRecord::Base
       break if break_it == true
     end
 
-    converted_str = ''
-    str_array.length.times do |x|
-      # Add a space after each word.
-      converted_str = converted_str + str_array[x].to_s + ' '
-    end
+    converted_str = "#{str_array.blank? ? '' : str_array.join(' ')}"
     converted_str.strip
   end
 
