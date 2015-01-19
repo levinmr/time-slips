@@ -38,7 +38,7 @@ class Sheet < ActiveRecord::Base
       l.save
     end
     combine_lines
-    new_lines = Line.where(sheet_id: id).select { |l| !l.destroyed }
+    new_lines = Line.where(sheet_id: id).select { |l| !l.destroyed? }
     new_lines.each do |l|
       l.description = convert_changes(l.description)
       l.save
