@@ -38,11 +38,15 @@ class Sheet < ActiveRecord::Base
       l.save
     end
     combine_lines
+    logger.info('Lines combined!')
     new_lines = Line.where(sheet_id: id).select { |l| !l.destroyed? }
-    new_lines.each do |l|
+    logger.info("New number of lines: #{new_lines.length}")
+    new_lines.each_with_index do |l, i|
+      logger.info("Line Number #{i} started")
       l.description = convert_changes(l.description)
       l.save
     end
+    logger.info('All Lines Converted!')
   end
 
   def get_time_and_client_return_description(l)
