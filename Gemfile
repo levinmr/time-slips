@@ -25,4 +25,4 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
 end
 
-ruby '1.9.3'
+ruby '2.1.1'
