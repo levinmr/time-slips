@@ -126,73 +126,60 @@ class Sheet < ActiveRecord::Base
     end
 
     str_array.length.times do |x|
-      if str_array[x].downcase == 'notice'
-        if str_array[x + 1] && str_array[x + 1].downcase == 'of'
-          if str_array[x + 2]
-            str_array[x] = 'Notice'
-            str_array[x + 2] = str_array[x + 2][0].upcase +
-              str_array[x + 2][1..str_array[x + 2].length]
-          end
-        end
+      if str_array[x].downcase == 'notice' &&
+        (str_array[x + 1] && str_array[x + 1].downcase == 'of') &&
+        str_array[x + 2]
+
+        str_array[x] = 'Notice'
+        str_array[x + 2] = str_array[x + 2].capitalize
       end
     end
 
     str_array.length.times do |x|
-      if str_array[x].downcase == 'motion'
-        if str_array[x + 1] && str_array[x + 1].downcase == 'to'
-          if str_array[x + 2]
-            str_array[x] = 'Motion'
-            str_array[x + 2] = str_array[x + 2][0].upcase +
-              str_array[x + 2][1..str_array[x + 2].length]
-          end
-        end
+      if str_array[x].downcase == 'motion' &&
+        (str_array[x + 1] && str_array[x + 1].downcase == 'to') &&
+        str_array[x + 2]
+
+        str_array[x] = 'Motion'
+        str_array[x + 2] = str_array[x + 2].capitalize
       end
     end
 
     str_array.length.times do |x|
-      if str_array[x].downcase == 'borough'
-        if str_array[x + 1] && str_array[x + 1].downcase == 'of'
-          if str_array[x + 2]
-            str_array[x] = 'Borough'
-            str_array[x + 2] = str_array[x + 2][0].upcase +
-              str_array[x + 2][1..str_array[x + 2].length]
-          end
-        end
+      if str_array[x].downcase == 'borough' &&
+        (str_array[x + 1] && str_array[x + 1].downcase == 'of') &&
+        str_array[x + 2]
+
+        str_array[x] = 'Borough'
+        str_array[x + 2] = str_array[x + 2].capitalize
       end
     end
 
     str_array.length.times do |x|
-      if str_array[x].downcase == 'reply'
-        if str_array[x + 1] && str_array[x + 1].downcase == 'to'
-          if str_array[x + 2] && str_array[x + 2].downcase == 'new'
-            if str_array[x + 3] && str_array[x + 3].downcase == 'matter'
-              str_array[x] = 'Reply'
-              str_array[x + 2] = 'New'
-              str_array[x + 3] = 'Matter'
-            end
-          end
-        end
+      if str_array[x].downcase == 'reply' &&
+        (str_array[x + 1] && str_array[x + 1].downcase == 'to') &&
+        (str_array[x + 2] && str_array[x + 2].downcase == 'new') &&
+        (str_array[x + 3] && str_array[x + 3].downcase == 'matter')
+
+        str_array[x] = 'Reply'
+        str_array[x + 2] = 'New'
+        str_array[x + 3] = 'Matter'
       end
     end
 
     str_array.length.times do |x|
       if str_array[x].downcase == 'interrogatories'
-        if str_array[x + 1] && str_array[x + 1].downcase == 'and'
-          if str_array[x + 2] && str_array[x + 2].downcase == 'request'
-            if str_array[x + 3] && str_array[x + 3].downcase == 'for'
-              if str_array[x + 4] && str_array[x + 4].downcase == 'production'
-                if str_array[x + 5] && str_array[x + 5].downcase == 'of'
-                  if str_array[x + 6] && str_array[x + 6].downcase == 'documents'
-                    str_array[x] = 'Interrogatories'
-                    str_array[x + 2] = 'Request'
-                    str_array[x + 4] = 'Production'
-                    str_array[x + 6] = 'Documents'
-                  end
-                end
-              end
-            end
-          end
-        end
+        (str_array[x + 1] && str_array[x + 1].downcase == 'and') &&
+        (str_array[x + 2] && str_array[x + 2].downcase == 'request') &&
+        (str_array[x + 3] && str_array[x + 3].downcase == 'for') &&
+        (str_array[x + 4] && str_array[x + 4].downcase == 'production') &&
+        (str_array[x + 5] && str_array[x + 5].downcase == 'of') &&
+        (str_array[x + 6] && str_array[x + 6].downcase == 'documents')
+
+        str_array[x] = 'Interrogatories'
+        str_array[x + 2] = 'Request'
+        str_array[x + 4] = 'Production'
+        str_array[x + 6] = 'Documents'
       end
     end
 
