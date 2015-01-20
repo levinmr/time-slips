@@ -49,6 +49,8 @@ class Sheet < ActiveRecord::Base
     logger.info('All Lines Converted!')
   end
 
+  private
+
   def get_time_and_client_return_description(l)
     desc = l.description
     desc = desc.gsub(/\u2013|\u2014|\u2015/, '-')
@@ -100,33 +102,16 @@ class Sheet < ActiveRecord::Base
     str.to_f
   end
 
+  # params: lowercase string of words and punctuation
+  # return: same string with changes replaced and proper capitalization
   def convert_changes(str)
     # Split by spaces to get every individual word.
     # Check each word against the changes listed in the DB.
     str_array = str.split(' ').select { |x| !x.blank? }
 
-    # Reassemble the string
-    str_array.length.times do |x|
-      # If it's the beginning of the string, or right after punctuation,
-      # then capitalize the word.
-      word = str_array[x]
-      str_array[x] = convert_word(str_array[x])
-      if word != str_array[x]
-        word = str_array[x]
-        if x == 0 || (str_array[x - 1] &&
-          (str_array[x - 1].split('').last =~ /[.?!]/))
-          word[0] = word[0].upcase unless word.nil?
-        end
-      else
-        if x == 0 || (str_array[x - 1] &&
-          (str_array[x - 1].split('').last =~ /[.?!]/))
-          word[0] = word[0].upcase unless word.nil?
-        elsif word.length == 2 && (str_array[x].split('').last =~ /[.?!]/)
-          word[0] = word[0].upcase unless word.nil?
-        end
-      end
-      str_array[x] = word
-    end
+    # Convert Changes
+    str_array.map { |x| x = convert_word(x) }
+
 
     str_array.length.times do |x|
       if str_array[x].downcase == 'notice' &&
@@ -186,17 +171,31 @@ class Sheet < ActiveRecord::Base
       end
     end
 
-    str_array.length.times do |x|
-      if str_array[x] == 'fof/col' || str_array[x] == 'fof/col;'
-        before = str_array[0..x - 1]
-        after = str_array[x + 1..str_array.length]
-        semi = true if str_array[x][str_array[x].length - 1] == ';'
-        new_array = ['Findings', 'of', 'Fact', 'and', 'Conclusions', 'of',
-                     'Law' + (semi == true ? ';' : '')]
-        str_array = before + new_array + after
-        break_it = true
+    if str_array.include?('fof/col') || str_array.include?('fof/col;')
+      str_array.length.times do |x|
+        if str_array[x] == 'fof/col' || str_array[x] == 'fof/col;'
+          before = str_array[0..x - 1]
+          after = str_array[x + 1..str_array.length]
+          semi = true if str_array[x][str_array[x].length - 1] == ';'
+          new_array = ['Findings', 'of', 'Fact', 'and', 'Conclusions', 'of',
+                       'Law' + (semi == true ? ';' : '')]
+          str_array = before + new_array + after
+          break_it = true
+        end
+        break if break_it == true
       end
-      break if break_it == true
+    end
+
+    # Capitalize properly
+    str_array.length.times do |x|
+      # If it's the beginning of the string, or right after punctuation,
+      # then capitalize the word.
+      if x == 0 || (str_array[x - 1] &&
+        (str_array[x - 1].split('').last =~ /[.?!]/))
+        str_array[x] = str_array[x].capitalize
+      elsif str_array[x].length == 2 && (str_array[x].split('').last =~ /[.?!]/)
+        str_array[x] = str_array[x].capitalize
+      end
     end
 
     converted_str = "#{str_array.blank? ? '' : str_array.join(' ')}"
