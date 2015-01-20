@@ -8,6 +8,7 @@ class Sheet < ActiveRecord::Base
   mount_uploader :file, SheetUploader
 
   def parse_file
+    @changes = Change.all
     # delete all existing lines for the sheet (since we're replacing them)
     Line.delete_all("sheet_id = #{id} or sheet_id is null")
 
@@ -216,7 +217,6 @@ class Sheet < ActiveRecord::Base
       new_str = (punctuation.nil? ? str : str[0..-2])
       possessive = (new_str.include?("'s") ? true : false)
       new_str = new_str[0..-3] if possessive == true
-      @changes = Change.all
       @changes.each do |c|
         if new_str.casecmp(c.abbrev) == 0
           new_str = c.name
