@@ -43,7 +43,7 @@ class Sheet < ActiveRecord::Base
     logger.info("New number of lines: #{new_lines.length}")
     new_lines.each_with_index do |l, i|
       logger.info("Line Number #{i} started")
-      l.description = convert_changes(l.description)
+      l.description = convert_changes(l.description.downcase)
       l.save
     end
     logger.info('All Lines Converted!')
@@ -104,7 +104,6 @@ class Sheet < ActiveRecord::Base
     # Split by spaces to get every individual word.
     # Check each word against the changes listed in the DB.
     str_array = str.split(' ').select { |x| !x.blank? }
-                              .map    { |x| x.downcase }
 
     # Reassemble the string
     str_array.length.times do |x|
@@ -215,12 +214,12 @@ class Sheet < ActiveRecord::Base
         convert_word(str[(slash_index + 1)..str.length])
     else
       punctuation = str.split('').last =~ /[.?!;,]/ ? str.split('').last : nil
-      new_str = (punctuation.nil? ? str.downcase : str[0..-2].downcase)
+      new_str = (punctuation.nil? ? str : str[0..-2])
       possessive = (new_str.include?("'s") ? true : false)
       new_str = new_str[0..-3] if possessive == true
       @changes = Change.all
       @changes.each do |c|
-        if new_str == c.abbrev.downcase
+        if new_str.casecmp(c.abbrev) == 0
           new_str = c.name
           break
         end
