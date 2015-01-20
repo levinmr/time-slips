@@ -110,8 +110,16 @@ class Sheet < ActiveRecord::Base
     # Check each word against the changes listed in the DB.
     str_array = str.split(' ').select { |x| !x.blank? }
 
-    # Convert Changes
-    str_array.map { |x| convert_word(x) }
+    # Convert Words as needed.
+    str_array.map do |x|
+      if x.include?('/')
+        word_splitter(x, '/')
+      elsif x.include?('-')
+        word_splitter(x, '-')
+      else
+        convert_word(x)
+      end
+    end
 
     str_array.length.times do |x|
       if str_array[x].downcase == 'notice' &&
@@ -203,29 +211,34 @@ class Sheet < ActiveRecord::Base
   end
 
   def convert_word(str)
-    if str.length > 2 && str.include?('-')
-      slash_index = str.index('-')
-      new_str = convert_word(str[0..(slash_index - 1)]) + '-' +
-        (slash_index == str.length ? '' : convert_word(str[(slash_index + 1)..str.length]))
-    elsif str.length > 2 && str.include?('/')
-      slash_index = str.index('/')
-      new_str = convert_word(str[0..(slash_index - 1)]) + '/' +
-        (slash_index == str.length ? '' : convert_word(str[(slash_index + 1)..str.length]))
-    else
-      punctuation = str.split('').last =~ /[.?!;,]/ ? str.split('').last : nil
-      new_str = (punctuation.nil? ? str : str[0..-2])
-      possessive = (new_str.include?("'s") ? true : false)
-      new_str = new_str[0..-3] if possessive == true
-      @changes.each do |c|
-        if new_str.casecmp(c.abbrev) == 0
-          new_str = c.name
-          break
-        end
+    punctuation = str.split('').last =~ /[.?!;,]/ ? str.split('').last : nil
+    new_str = (punctuation.nil? ? str : str[0..-2])
+    possessive = (new_str.include?("'s") ? true : false)
+    new_str = new_str[0..-3] if possessive == true
+    @changes.each do |c|
+      if new_str.casecmp(c.abbrev) == 0
+        new_str = c.name
+        break
       end
-      new_str = new_str + (possessive == true ? "'s" : '') +
-        (punctuation.nil? ? '' : punctuation)
     end
-    new_str
+    new_str = new_str + (possessive == true ? "'s" : '') +
+      (punctuation.nil? ? '' : punctuation)
+  end
+
+  def word_splitter(str, split_char)
+    if str.length > 2
+      split_index = str.index(split_char)
+      if split_index == 0
+        "/ #{convert_word(str[1..str.length])}"
+      elsif split_index == str.length
+        "#{convert_word(str[0..str.length - 1])} /"
+      else
+        convert_word(str[0..(split_index - 1)]) + split_char +
+          convert_word(str[(split_index + 1)..str.length])
+      end
+    else
+      convert_word(str)
+    end
   end
 
   def combine_lines
