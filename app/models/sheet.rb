@@ -111,8 +111,7 @@ class Sheet < ActiveRecord::Base
     str_array = str.split(' ').select { |x| !x.blank? }
 
     # Convert Changes
-    str_array.map { |x| x = convert_word(x) }
-
+    str_array.map { |x| convert_word(x) }
 
     str_array.length.times do |x|
       if str_array[x].downcase == 'notice' &&
@@ -207,11 +206,11 @@ class Sheet < ActiveRecord::Base
     if str.length > 2 && str.include?('-')
       slash_index = str.index('-')
       new_str = convert_word(str[0..(slash_index - 1)]) + '-' +
-        convert_word(str[(slash_index + 1)..str.length])
+        (slash_index == str.length ? '' : convert_word(str[(slash_index + 1)..str.length]))
     elsif str.length > 2 && str.include?('/')
       slash_index = str.index('/')
       new_str = convert_word(str[0..(slash_index - 1)]) + '/' +
-        convert_word(str[(slash_index + 1)..str.length])
+        (slash_index == str.length ? '' : convert_word(str[(slash_index + 1)..str.length]))
     else
       punctuation = str.split('').last =~ /[.?!;,]/ ? str.split('').last : nil
       new_str = (punctuation.nil? ? str : str[0..-2])
