@@ -110,20 +110,19 @@ class Sheet < ActiveRecord::Base
     str_array = str.split(' ').select { |x| !x.blank? }
 
     # Convert Words as needed.
-    str_array.map do |x|
+    str_array.each_with_index do |x, i|
       if x.include?('/')
-        x = word_splitter(x, '/')
+        str_array[i] = word_splitter(x, '/')
       elsif x.include?('-')
-        x = word_splitter(x, '-')
+        str_array[i] = word_splitter(x, '-')
       else
-        x = convert_word(x)
+        str_array[i] = convert_word(x)
       end
-      x
     end
 
     str_array.length.times do |x|
-      if str_array[x].downcase == 'notice' &&
-        (str_array[x + 1] && str_array[x + 1].downcase == 'of') &&
+      if str_array[x] == 'notice' &&
+        (str_array[x + 1] && str_array[x + 1] == 'of') &&
         str_array[x + 2]
 
         str_array[x] = 'Notice'
@@ -132,8 +131,8 @@ class Sheet < ActiveRecord::Base
     end
 
     str_array.length.times do |x|
-      if str_array[x].downcase == 'motion' &&
-        (str_array[x + 1] && str_array[x + 1].downcase == 'to') &&
+      if str_array[x] == 'motion' &&
+        (str_array[x + 1] && str_array[x + 1] == 'to') &&
         str_array[x + 2]
 
         str_array[x] = 'Motion'
@@ -142,8 +141,8 @@ class Sheet < ActiveRecord::Base
     end
 
     str_array.length.times do |x|
-      if str_array[x].downcase == 'borough' &&
-        (str_array[x + 1] && str_array[x + 1].downcase == 'of') &&
+      if str_array[x] == 'borough' &&
+        (str_array[x + 1] && str_array[x + 1] == 'of') &&
         str_array[x + 2]
 
         str_array[x] = 'Borough'
@@ -152,10 +151,10 @@ class Sheet < ActiveRecord::Base
     end
 
     str_array.length.times do |x|
-      if str_array[x].downcase == 'reply' &&
-        (str_array[x + 1] && str_array[x + 1].downcase == 'to') &&
-        (str_array[x + 2] && str_array[x + 2].downcase == 'new') &&
-        (str_array[x + 3] && str_array[x + 3].downcase == 'matter')
+      if str_array[x] == 'reply' &&
+        (str_array[x + 1] && str_array[x + 1] == 'to') &&
+        (str_array[x + 2] && str_array[x + 2] == 'new') &&
+        (str_array[x + 3] && str_array[x + 3] == 'matter')
 
         str_array[x] = 'Reply'
         str_array[x + 2] = 'New'
@@ -164,13 +163,13 @@ class Sheet < ActiveRecord::Base
     end
 
     str_array.length.times do |x|
-      if str_array[x].downcase == 'interrogatories'
-        (str_array[x + 1] && str_array[x + 1].downcase == 'and') &&
-        (str_array[x + 2] && str_array[x + 2].downcase == 'request') &&
-        (str_array[x + 3] && str_array[x + 3].downcase == 'for') &&
-        (str_array[x + 4] && str_array[x + 4].downcase == 'production') &&
-        (str_array[x + 5] && str_array[x + 5].downcase == 'of') &&
-        (str_array[x + 6] && str_array[x + 6].downcase == 'documents')
+      if str_array[x] == 'interrogatories'
+        (str_array[x + 1] && str_array[x + 1] == 'and') &&
+        (str_array[x + 2] && str_array[x + 2] == 'request') &&
+        (str_array[x + 3] && str_array[x + 3] == 'for') &&
+        (str_array[x + 4] && str_array[x + 4] == 'production') &&
+        (str_array[x + 5] && str_array[x + 5] == 'of') &&
+        (str_array[x + 6] && str_array[x + 6] == 'documents')
 
         str_array[x] = 'Interrogatories'
         str_array[x + 2] = 'Request'
