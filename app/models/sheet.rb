@@ -112,12 +112,13 @@ class Sheet < ActiveRecord::Base
     # Convert Words as needed.
     str_array.map do |x|
       if x.include?('/')
-        word_splitter(x, '/')
+        x = word_splitter(x, '/')
       elsif x.include?('-')
-        word_splitter(x, '-')
+        x = word_splitter(x, '-')
       else
-        convert_word(x)
+        x = convert_word(x)
       end
+      x
     end
 
     str_array.length.times do |x|
@@ -214,7 +215,7 @@ class Sheet < ActiveRecord::Base
     new_str = (punctuation.nil? ? str : str[0..-2])
     possessive = (new_str.include?("'s") ? true : false)
     new_str = new_str[0..-3] if possessive == true
-    @changes ||= Change.all
+    @changes = Change.all
     @changes.each do |c|
       if new_str.casecmp(c.abbrev) == 0
         new_str = c.name
